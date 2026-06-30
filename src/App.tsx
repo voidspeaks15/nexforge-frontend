@@ -3,6 +3,7 @@ import Auth from './pages/Auth'
 import Dashboard from './pages/Dashboard'
 import Billing from './pages/Billing'
 import Analytics from './pages/Analytics'
+import Settings from './pages/Settings'
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -24,6 +25,9 @@ export default function App() {
             <button onClick={() => setCurrentPage('billing')} style={{ padding: '8px 15px', border: 'none', background: currentPage === 'billing' ? '#000' : '#fff', color: currentPage === 'billing' ? '#fff' : '#000', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold' }}>
               Billing
             </button>
+            <button onClick={() => setCurrentPage('settings')} style={{ padding: '8px 15px', border: 'none', background: currentPage === 'settings' ? '#000' : '#fff', color: currentPage === 'settings' ? '#fff' : '#000', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold' }}>
+              Settings
+            </button>
             <button onClick={() => {
               localStorage.removeItem('token')
               localStorage.removeItem('email')
@@ -36,6 +40,7 @@ export default function App() {
           {currentPage === 'dashboard' && <Dashboard />}
           {currentPage === 'analytics' && <Analytics />}
           {currentPage === 'billing' && <Billing />}
+          {currentPage === 'settings' && <Settings />}
         </div>
       )}
     </div>
