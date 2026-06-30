@@ -5,6 +5,7 @@ import Billing from './pages/Billing'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
 import VideoGenerator from './pages/VideoGenerator'
+import AdminDashboard from './pages/AdminDashboard'
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -32,6 +33,9 @@ export default function App() {
             <button onClick={() => setCurrentPage('settings')} style={{ padding: '8px 15px', border: 'none', background: currentPage === 'settings' ? '#000' : '#fff', color: currentPage === 'settings' ? '#fff' : '#000', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
               Settings
             </button>
+            <button onClick={() => setCurrentPage('admin')} style={{ padding: '8px 15px', border: 'none', background: currentPage === 'admin' ? '#000' : '#fff', color: currentPage === 'admin' ? '#fff' : '#000', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold', whiteSpace: 'nowrap', backgroundColor: currentPage === 'admin' ? '#d32f2f' : '#f0f0f0' }}>
+              👨‍💼 Admin
+            </button>
             <button onClick={() => {
               localStorage.removeItem('token')
               localStorage.removeItem('email')
@@ -46,6 +50,7 @@ export default function App() {
           {currentPage === 'analytics' && <Analytics />}
           {currentPage === 'billing' && <Billing />}
           {currentPage === 'settings' && <Settings />}
+          {currentPage === 'admin' && <AdminDashboard />}
         </div>
       )}
     </div>
