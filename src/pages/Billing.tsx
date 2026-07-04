@@ -1,9 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 
 export default function Billing() {
   const [selectedPlan, setSelectedPlan] = useState('starter')
   const [loading, setLoading] = useState(false)
+
+  // Add Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    document.body.appendChild(script)
+  }, [])
 
   const plans = [
     { id: 'starter', name: 'STARTER', price: 9, videos: 3 },
@@ -21,7 +29,6 @@ export default function Billing() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
-      // Open Razorpay
       const options = {
         key: 'rzp_live_T7QW3u95fvv3Hx',
         amount: response.data.amount,
@@ -38,7 +45,7 @@ export default function Billing() {
       const rzp = new (window as any).Razorpay(options)
       rzp.open()
     } catch (err) {
-      alert('Payment failed')
+      alert('Payment failed: ' + (err as any).message)
     } finally {
       setLoading(false)
     }
@@ -83,10 +90,8 @@ export default function Billing() {
           fontWeight: 'bold'
         }}
       >
-        {loading ? 'Processing...' : 'Pay with Razorpay'}
+        {loading ? 'Processing...' : '💳 Pay with Razorpay'}
       </button>
-
-      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     </div>
   )
 }
