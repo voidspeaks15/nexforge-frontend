@@ -1,171 +1,384 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import { Key, User, Bell, Lock, Trash2, Save } from 'lucide-react'
 
 export default function Settings() {
-  const [apiKeys, setApiKeys] = useState<any[]>([])
-  const [newKey, setNewKey] = useState('')
-  const [provider, setProvider] = useState('groq')
-  const [loading, setLoading] = useState(false)
+  const [apiKeys, setApiKeys] = useState([
+    { provider: 'groq', lastFour: '****abc1', active: true },
+    { provider: 'cloudflare', lastFour: '****def2', active: true },
+    { provider: 'elevenlabs', lastFour: '****ghi3', active: true }
+  ])
 
-  const handleAddKey = async () => {
-    if (!newKey) {
-      alert('Enter API key')
-      return
-    }
+  const [newKey, setNewKey] = useState({ provider: 'groq', key: '' })
+  const [addingKey, setAddingKey] = useState(false)
 
-    setLoading(true)
-    try {
-      const token = localStorage.getItem('token')
-      const response = await axios.post(
-        'https://nexforge-backend.onrender.com/api/api-keys/add',
-        { provider, apiKey: newKey },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      alert('API key added successfully!')
-      setNewKey('')
-      setProvider('groq')
-      fetchApiKeys()
-    } catch (err) {
-      alert('Failed to add API key')
-    } finally {
-      setLoading(false)
+  const email = localStorage.getItem('email') || 'user@example.com'
+
+  const handleAddKey = () => {
+    if (newKey.key.trim()) {
+      setApiKeys([...apiKeys, {
+        provider: newKey.provider,
+        lastFour: '****' + newKey.key.slice(-4),
+        active: true
+      }])
+      setNewKey({ provider: 'groq', key: '' })
+      setAddingKey(false)
     }
   }
 
-  const fetchApiKeys = async () => {
-    try {
-      const token = localStorage.getItem('token')
-      const response = await axios.get(
-        'https://nexforge-backend.onrender.com/api/api-keys/list',
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      setApiKeys(response.data.apiKeys || [])
-    } catch (err) {
-      console.error('Failed to fetch API keys')
-    }
+  const handleDeleteKey = (index: number) => {
+    setApiKeys(apiKeys.filter((_, i) => i !== index))
   }
-
-  React.useEffect(() => {
-    fetchApiKeys()
-  }, [])
 
   return (
-    <div style={{ padding: '40px', fontFamily: 'Arial', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <h1>⚙️ Settings</h1>
+    <div style={{
+      backgroundColor: '#0a0e27',
+      color: '#fff',
+      minHeight: '100vh',
+      padding: '40px',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      {/* Header */}
+      <div style={{ marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '10px' }}>
+          ⚙️ Settings
+        </h1>
+        <p style={{ color: '#cbd5e1' }}>Manage your account and API keys</p>
+      </div>
 
-      {/* API Keys Section */}
-      <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h3>🔑 API Keys Management</h3>
-        
-        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '6px' }}>
-          <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
-            Provider:
-            <select 
-              value={provider} 
-              onChange={(e) => setProvider(e.target.value)}
-              style={{ marginLeft: '10px', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
-            >
-              <option value="groq">Groq</option>
-              <option value="cloudflare">Cloudflare</option>
-              <option value="elevenlabs">ElevenLabs</option>
-              <option value="youtube">YouTube</option>
-              <option value="instagram">Instagram</option>
-            </select>
-          </label>
-
-          <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
-            API Key:
-            <input
-              type="password"
-              value={newKey}
-              onChange={(e) => setNewKey(e.target.value)}
-              placeholder="Enter your API key"
-              style={{ marginLeft: '10px', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', width: '300px' }}
-            />
-          </label>
-
-          <button
-            onClick={handleAddKey}
-            disabled={loading}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#000',
+      <div style={{ maxWidth: '1000px', display: 'grid', gridTemplateColumns: '250px 1fr', gap: '40px' }}>
+        {/* Sidebar */}
+        <div style={{
+          backgroundColor: 'rgba(168, 85, 247, 0.1)',
+          border: '1px solid rgba(168, 85, 247, 0.3)',
+          borderRadius: '12px',
+          padding: '20px',
+          height: 'fit-content'
+        }}>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button style={{
+              padding: '12px',
+              backgroundColor: '#a855f7',
               color: '#fff',
               border: 'none',
-              borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontWeight: 'bold'
-            }}
-          >
-            {loading ? 'Adding...' : 'Add API Key'}
-          </button>
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <User size={18} />
+              Account
+            </button>
+            <button style={{
+              padding: '12px',
+              backgroundColor: 'transparent',
+              color: '#cbd5e1',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <Key size={18} />
+              API Keys
+            </button>
+            <button style={{
+              padding: '12px',
+              backgroundColor: 'transparent',
+              color: '#cbd5e1',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <Bell size={18} />
+              Notifications
+            </button>
+            <button style={{
+              padding: '12px',
+              backgroundColor: 'transparent',
+              color: '#cbd5e1',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <Lock size={18} />
+              Security
+            </button>
+          </nav>
         </div>
 
-        {/* Saved Keys */}
-        <div style={{ marginTop: '20px' }}>
-          <h4>Your API Keys:</h4>
-          {apiKeys.length === 0 ? (
-            <p style={{ color: '#666' }}>No API keys added yet</p>
-          ) : (
-            apiKeys.map((key, index) => (
-              <div key={index} style={{ padding: '10px', marginTop: '10px', backgroundColor: '#f0f0f0', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span><strong>{key.provider.toUpperCase()}</strong> - ****{key.lastFourDigits}</span>
-                <button
-                  style={{
-                    padding: '5px 10px',
-                    backgroundColor: '#d32f2f',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px'
-                  }}
-                >
-                  Delete
-                </button>
+        {/* Content */}
+        <div>
+          {/* Account Section */}
+          <div style={{
+            backgroundColor: 'rgba(168, 85, 247, 0.05)',
+            border: '1px solid rgba(168, 85, 247, 0.2)',
+            borderRadius: '12px',
+            padding: '30px',
+            marginBottom: '30px'
+          }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <User size={20} color="#a855f7" />
+              Account Information
+            </h2>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                marginBottom: '8px',
+                color: '#a855f7'
+              }}>
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={email}
+                disabled
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                  border: '1px solid rgba(168, 85, 247, 0.3)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                marginBottom: '8px',
+                color: '#a855f7'
+              }}>
+                Full Name
+              </label>
+              <input
+                type="text"
+                placeholder="Your Name"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                  border: '1px solid rgba(168, 85, 247, 0.3)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <button style={{
+              padding: '12px 30px',
+              backgroundColor: '#a855f7',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <Save size={18} />
+              Save Changes
+            </button>
+          </div>
+
+          {/* API Keys Section */}
+          <div style={{
+            backgroundColor: 'rgba(168, 85, 247, 0.05)',
+            border: '1px solid rgba(168, 85, 247, 0.2)',
+            borderRadius: '12px',
+            padding: '30px'
+          }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Key size={20} color="#a855f7" />
+              API Keys
+            </h2>
+
+            {/* Existing Keys */}
+            <div style={{ marginBottom: '30px' }}>
+              <p style={{ color: '#cbd5e1', fontSize: '14px', marginBottom: '15px' }}>
+                Your connected API keys:
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {apiKeys.map((keyItem, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '15px',
+                      backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                      border: '1px solid rgba(168, 85, 247, 0.3)',
+                      borderRadius: '8px'
+                    }}
+                  >
+                    <div>
+                      <p style={{ fontWeight: 'bold', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
+                        {keyItem.provider}
+                      </p>
+                      <p style={{ color: '#cbd5e1', fontSize: '14px', margin: '0' }}>
+                        {keyItem.lastFour}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        width: '12px',
+                        height: '12px',
+                        backgroundColor: '#10b981',
+                        borderRadius: '50%'
+                      }} />
+                      <button
+                        onClick={() => handleDeleteKey(index)}
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                          color: '#fca5a5',
+                          border: '1px solid rgba(239, 68, 68, 0.5)',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontWeight: 'bold',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}
+                      >
+                        <Trash2 size={16} />
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))
-          )}
+            </div>
+
+            {/* Add New Key */}
+            {addingKey ? (
+              <div style={{
+                padding: '20px',
+                backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                border: '1px solid rgba(6, 182, 212, 0.3)',
+                borderRadius: '12px'
+              }}>
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ color: '#06b6d4', fontWeight: 'bold', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+                    Provider
+                  </label>
+                  <select
+                    value={newKey.provider}
+                    onChange={(e) => setNewKey({ ...newKey, provider: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                      border: '1px solid rgba(168, 85, 247, 0.3)',
+                      borderRadius: '6px',
+                      color: '#fff',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value="groq">Groq</option>
+                    <option value="cloudflare">Cloudflare</option>
+                    <option value="elevenlabs">ElevenLabs</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="instagram">Instagram</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ color: '#06b6d4', fontWeight: 'bold', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+                    API Key
+                  </label>
+                  <input
+                    type="password"
+                    value={newKey.key}
+                    onChange={(e) => setNewKey({ ...newKey, key: e.target.value })}
+                    placeholder="Paste your API key here"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                      border: '1px solid rgba(168, 85, 247, 0.3)',
+                      borderRadius: '6px',
+                      color: '#fff',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={handleAddKey}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      backgroundColor: '#10b981',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Add Key
+                  </button>
+                  <button
+                    onClick={() => setAddingKey(false)}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      backgroundColor: 'transparent',
+                      color: '#cbd5e1',
+                      border: '1px solid rgba(168, 85, 247, 0.3)',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAddingKey(true)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: 'rgba(6, 182, 212, 0.2)',
+                  color: '#06b6d4',
+                  border: '2px dashed rgba(6, 182, 212, 0.5)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                + Add New API Key
+              </button>
+            )}
+          </div>
         </div>
-      </div>
-
-      {/* Account Settings */}
-      <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h3>👤 Account Settings</h3>
-        
-        <div style={{ marginTop: '15px' }}>
-          <p><strong>Email:</strong> {localStorage.getItem('email')}</p>
-          <p><strong>Member Since:</strong> June 2026</p>
-          <p><strong>Account Status:</strong> <span style={{ color: '#4caf50', fontWeight: 'bold' }}>Active</span></p>
-        </div>
-
-        <button style={{
-          marginTop: '20px',
-          padding: '10px 20px',
-          backgroundColor: '#d32f2f',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontWeight: 'bold'
-        }}>
-          Change Password
-        </button>
-      </div>
-
-      {/* Preferences */}
-      <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h3>🎨 Preferences</h3>
-        
-        <label style={{ display: 'block', marginBottom: '15px' }}>
-          <input type="checkbox" defaultChecked /> Email notifications for new videos
-        </label>
-        <label style={{ display: 'block', marginBottom: '15px' }}>
-          <input type="checkbox" defaultChecked /> Weekly analytics report
-        </label>
-        <label style={{ display: 'block', marginBottom: '15px' }}>
-          <input type="checkbox" /> Dark mode
-        </label>
       </div>
     </div>
   )
