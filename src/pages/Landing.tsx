@@ -1,7 +1,11 @@
 import React from 'react'
-import { ArrowRight, Zap, BarChart3, CreditCard, Play } from 'lucide-react'
+import { ArrowRight, Zap, BarChart3, CreditCard } from 'lucide-react'
 
-export default function Landing() {
+interface LandingProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function Landing({ onNavigate }: LandingProps) {
   return (
     <div style={{ backgroundColor: '#0a0e27', color: '#fff', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
       {/* Navigation */}
@@ -14,10 +18,10 @@ export default function Landing() {
         backdropFilter: 'blur(10px)'
       }}>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#a855f7' }}>🌑 NEXFORGE</h1>
-        <div style={{ display: 'flex', gap: '30px' }}>
+        <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
           <a href="#features" style={{ color: '#fff', textDecoration: 'none', cursor: 'pointer' }}>Features</a>
           <a href="#pricing" style={{ color: '#fff', textDecoration: 'none', cursor: 'pointer' }}>Pricing</a>
-          <button style={{
+          <button onClick={() => onNavigate?.('auth')} style={{
             padding: '10px 20px',
             backgroundColor: '#a855f7',
             color: '#fff',
@@ -66,7 +70,7 @@ export default function Landing() {
           <p style={{ fontSize: '20px', color: '#cbd5e1', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>
             Generate, optimize, and publish AI-powered content across YouTube, Instagram, and TikTok automatically.
           </p>
-          <button style={{
+          <button onClick={() => onNavigate?.('auth')} style={{
             padding: '16px 40px',
             fontSize: '16px',
             backgroundColor: '#a855f7',
@@ -169,7 +173,7 @@ export default function Landing() {
               <li style={{ marginBottom: '10px' }}>✅ 5 genres</li>
               <li>✅ YouTube only</li>
             </ul>
-            <button style={{
+            <button onClick={() => onNavigate?.('auth')} style={{
               width: '100%',
               padding: '12px',
               backgroundColor: 'transparent',
@@ -211,7 +215,7 @@ export default function Landing() {
               <li style={{ marginBottom: '10px' }}>✅ 15 genres</li>
               <li>✅ YouTube + Instagram</li>
             </ul>
-            <button style={{
+            <button onClick={() => onNavigate?.('auth')} style={{
               width: '100%',
               padding: '12px',
               backgroundColor: '#a855f7',
@@ -239,7 +243,7 @@ export default function Landing() {
               <li style={{ marginBottom: '10px' }}>✅ Unlimited genres</li>
               <li>✅ All platforms</li>
             </ul>
-            <button style={{
+            <button onClick={() => onNavigate?.('auth')} style={{
               width: '100%',
               padding: '12px',
               backgroundColor: 'transparent',
@@ -262,7 +266,7 @@ export default function Landing() {
       }}>
         <h3 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '20px' }}>Ready to Automate?</h3>
         <p style={{ fontSize: '18px', color: '#cbd5e1', marginBottom: '30px' }}>Start creating amazing AI content today</p>
-        <button style={{
+        <button onClick={() => onNavigate?.('auth')} style={{
           padding: '16px 40px',
           fontSize: '16px',
           backgroundColor: '#a855f7',
