@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Sparkles, Image, Volume2, Play, Download } from 'lucide-react'
+import { Sparkles, Image, Volume2, Play, Download, Youtube } from 'lucide-react'
 
 export default function VideoGenerator() {
   const [selectedGenre, setSelectedGenre] = useState('samurai')
@@ -8,6 +8,7 @@ export default function VideoGenerator() {
   const [loading, setLoading] = useState(false)
   const [pipelineData, setPipelineData] = useState<any>(null)
   const [error, setError] = useState('')
+  const [youtubeConnected, setYoutubeConnected] = useState(false)
 
   const genres = [
     { id: 'samurai', name: '🗡️ Samurai', emoji: '⛩️' },
@@ -19,6 +20,68 @@ export default function VideoGenerator() {
     { id: 'fantasy', name: '🐉 Fantasy', emoji: '✨' },
     { id: 'scifi', name: '🌌 Sci-Fi', emoji: '🚀' }
   ]
+
+  // Check if YouTube token exists in URL (callback)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    
+    if (code) {
+      handleYoutubeCallback(code)
+    }
+
+    // Check localStorage for YouTube token
+    const youtubeToken = localStorage.getItem('youtubeAccessToken')
+    if (youtubeToken) {
+      setYoutubeConnected(true)
+    }
+  }, [])
+
+  const handleYoutubeCallback = async (code: string) => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await axios.post(
+        'https://nexforge-backend.onrender.com/api/youtube/callback',
+        { code },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      // Save tokens
+      localStorage.setItem('youtubeAccessToken', response.data.accessToken)
+      if (response.data.refreshToken) {
+        localStorage.setItem('youtubeRefreshToken', response.data.refreshToken)
+      }
+
+      setYoutubeConnected(true)
+      alert('YouTube connected successfully!')
+      
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to connect YouTube')
+    }
+  }
+
+  const handleConnectYouTube = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await axios.get(
+        'https://nexforge-backend.onrender.com/api/youtube/auth-url',
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      
+      // Redirect to YouTube OAuth
+      window.location.href = response.data.authUrl
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to get YouTube auth URL')
+    }
+  }
+
+  const handleDisconnectYouTube = () => {
+    localStorage.removeItem('youtubeAccessToken')
+    localStorage.removeItem('youtubeRefreshToken')
+    setYoutubeConnected(false)
+  }
 
   const handleGenerate = async () => {
     if (!title.trim()) {
@@ -43,6 +106,37 @@ export default function VideoGenerator() {
     }
   }
 
+  const handleUploadYouTube = async () => {
+    if (!youtubeConnected) {
+      setError('Please connect YouTube first')
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('token')
+      const youtubeToken = localStorage.getItem('youtubeAccessToken')
+
+      await axios.post(
+        'https://nexforge-backend.onrender.com/api/youtube/upload',
+        {
+          videoPath: pipelineData.videoReady ? 'generated-video.mp4' : null,
+          title: title,
+          description: pipelineData.steps?.quote?.content,
+          accessToken: youtubeToken
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      alert('Video uploaded to YouTube successfully!')
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Upload failed')
+    }
+  }
+
+  const handleUploadInstagram = async () => {
+    alert('Instagram upload coming soon!')
+  }
+
   return (
     <div style={{
       backgroundColor: '#0a0e27',
@@ -62,6 +156,58 @@ export default function VideoGenerator() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', maxWidth: '1200px' }}>
         {/* Input Section */}
         <div>
+          {/* YouTube Status */}
+          <div style={{
+            backgroundColor: youtubeConnected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            border: youtubeConnected ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '12px',
+            padding: '15px',
+            marginBottom: '30px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Youtube size={20} color={youtubeConnected ? '#10b981' : '#ef4444'} />
+              <p style={{ margin: '0', color: youtubeConnected ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+                YouTube: {youtubeConnected ? 'Connected ✅' : 'Not Connected'}
+              </p>
+            </div>
+            {youtubeConnected ? (
+              <button
+                onClick={handleDisconnectYouTube}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                  color: '#fca5a5',
+                  border: '1px solid rgba(239, 68, 68, 0.5)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '12px'
+                }}
+              >
+                Disconnect
+              </button>
+            ) : (
+              <button
+                onClick={handleConnectYouTube}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#ef4444',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '12px'
+                }}
+              >
+                Connect
+              </button>
+            )}
+          </div>
+
           {/* Genre Selection */}
           <div style={{ marginBottom: '40px' }}>
             <label style={{
@@ -227,7 +373,8 @@ export default function VideoGenerator() {
                 backgroundColor: 'rgba(168, 85, 247, 0.1)',
                 border: '1px solid rgba(168, 85, 247, 0.3)',
                 borderRadius: '12px',
-                padding: '20px'
+                padding: '20px',
+                marginBottom: '20px'
               }}>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                   <Volume2 size={18} color="#10b981" />
@@ -245,36 +392,43 @@ export default function VideoGenerator() {
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '20px' }}>
-                <button style={{
-                  padding: '12px',
-                  backgroundColor: '#06b6d4',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}>
-                  <Play size={16} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button
+                  onClick={handleUploadYouTube}
+                  disabled={!youtubeConnected}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: youtubeConnected ? '#ef4444' : '#666',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: youtubeConnected ? 'pointer' : 'not-allowed',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Youtube size={16} />
                   YouTube
                 </button>
-                <button style={{
-                  padding: '12px',
-                  backgroundColor: '#ec4899',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}>
+                <button
+                  onClick={handleUploadInstagram}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: '#ec4899',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
                   <Play size={16} />
                   Instagram
                 </button>
