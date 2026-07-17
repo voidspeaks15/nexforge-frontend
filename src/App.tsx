@@ -8,10 +8,16 @@ import AdvancedAnalytics from './pages/AdvancedAnalytics'
 import Settings from './pages/Settings'
 import VideoGenerator from './pages/VideoGenerator'
 import AdminDashboard from './pages/AdminDashboard'
+import YouTubeCallback from './pages/YouTubeCallback'
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentPage, setCurrentPage] = useState('landing')
+
+  // Handle YouTube callback
+  if (window.location.pathname === '/auth/youtube-callback') {
+    return <YouTubeCallback />
+  }
 
   return (
     <div>
